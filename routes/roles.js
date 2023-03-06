@@ -24,7 +24,7 @@ router.get('/:id',
 //Crear Rol
 router.post('/',
 [
-    validarJWT,
+    // validarJWT,
     check( "rol","El nombre es obligatorio" ).not().isEmpty(),
     validarCampos
 ]

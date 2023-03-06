@@ -29,7 +29,7 @@ const obtenerRol = async (req = request, res = response) => {
 
 const crearRol = async (req = request, res = response) => {
 
-    const { rol } = req.body;
+    const { rol, name, id } = req.body;
 
     const rolDB = await Role.findOne({ rol });
 
@@ -40,7 +40,9 @@ const crearRol = async (req = request, res = response) => {
     }
 
     const data = {
-        rol
+        rol,
+        name,
+        id
     }
 
     const role = new Role(data);

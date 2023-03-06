@@ -7,10 +7,11 @@ const Usuario  =  require("./../models/usuario");
 
 const validarJWT = async ( req = request, res = response,next )=>{
 
-    const token = req.header( 'x-token' );
+    const token = req.header( 'Authorization' );
 
     if( !token ){
         return res.status( 401 ).json({
+            success: false,
             msg:"No hay token en la peticion"
         })
     }
@@ -25,6 +26,7 @@ const validarJWT = async ( req = request, res = response,next )=>{
 
         if ( !usuario ){
             res.status(401).json({
+                success: false,
                 msg:"Token no valido - Usuario no existe en BD"
             })
         }
@@ -33,7 +35,8 @@ const validarJWT = async ( req = request, res = response,next )=>{
 
         if( !usuario.estado ){
             res.status(401).json({
-                msg:"Token no valido - Usuario con estado False"
+                success: false,
+                msg:"Token no valido"
             })
         }
 
@@ -44,7 +47,8 @@ const validarJWT = async ( req = request, res = response,next )=>{
     } catch (error) {
         console.log(error);
         res.status(401).json({
-            msg:"Error en el catch, token no valido"
+            success: false,
+            msg:"Token expirado"
         })
     }
 

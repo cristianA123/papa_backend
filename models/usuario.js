@@ -1,44 +1,49 @@
 
-
-/* 
-{
-    nombre:"holas",
-    correo: "123456789",
-    password: "caminar",
-    img : '132321'
-    rol: 'esta'
-    estado : false or true,
-    google : false or true
-}
-*/
-
 const {  Schema, model } = require('mongoose');
+const moment = require('moment');
 
 const UsuarioSchema = Schema({
 
     nombre: {
         type: String,
-        required: [true, "El nombre es obligatorio"],
+        // required: [true, "El nombre es obligatorio"],
+    },
+    apellido: {
+        type: String,
+        // required: [true, "El nombre es obligatorio"],
     },
     correo: {
         type: String,
-        required: [true, "El nombre es obligatorio"],
-        unique: true
+        // required: [false, "El email es obligatorio"],
+        // unique: true
 
+    },
+    dni: {
+        type: String,
+        // unique: false
     },
     password: {
         type: String,
-        required: [true, "El nombre es obligatorio"],
+        // required: [false, "El nombre es obligatorio"],
 
     },
     img: {
         type : String
     },
-    rol: {
-        type: String,
-        required: true,
-        default:"USER_ROLE",
-        emun: ['ADMIN_ROLE','USER_ROLE'] 
+    role : {
+        type: Schema.Types.ObjectId,
+        ref: 'Role',
+        // required :  true
+    },
+    // rol: {
+    //     type: String,
+    //     required: true,
+    //     default:"USER_ROLE",
+    //     emun: ['ADMIN_ROLE','USER_ROLE'] 
+    // },
+    status: {
+        type: Boolean,
+        default: true,
     },
     estado: {
         type: Boolean,
@@ -47,6 +52,14 @@ const UsuarioSchema = Schema({
     google: {
         type: Boolean,
         default: false,
+    },
+    createdAt: {
+        type: Date,
+        default: moment(),
+    },
+    updatedAt: {
+        type: Date,
+        default: moment(),
     }
 
 });

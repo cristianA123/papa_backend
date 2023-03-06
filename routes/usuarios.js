@@ -7,7 +7,9 @@ const { usuariosGet,
         usuariosPut,
         usuariosPath,
         usuariosDelete, 
-        usuariosPost} = require('../controllers/usuarios');
+        usuariosPost,
+        userFullName
+} = require('../controllers/usuarios');
         
 const { validarJWT,
         esAdminRole,
@@ -23,6 +25,8 @@ const router = Router();
 
 router.get('/', usuariosGet);
 
+router.get('/fullName', userFullName);
+
 router.put('/:id',
 [
         check('id',"El id del usuario no es ID valido").isMongoId(),
@@ -37,13 +41,14 @@ usuariosPut);
 
 router.post('/',
 [
-        check('correo', 'correo no es valido' ).isEmail(),
+        // check('correo', 'correo no es valido' ).isEmail(),
         check('correo' ).custom(emailExiste),
         check('nombre', 'Nombre es necesario' ).not().isEmpty(),
-        check('password', 'La contraseña debe de tener 6 letras como minimo').isLength({ min:6 }),
-        check('img', 'La imagen es requerida').not().isEmpty(),
+        check('dni', 'El dni es necesario' ).not().isEmpty(),
+        // check('password', 'La contraseña debe de tener 6 letras como minimo').isLength({ min:6 }),
+        // check('img', 'La imagen es requerida').not().isEmpty(),
         // check('rol', 'No es un rol valido' ).isIn( ["ADMI_ROLE","USER_ROLE"] ),
-        check('rol').custom( esRoleValido ),
+        // check('rol').custom( esRoleValido ),
         validarCampos
 ],
 usuariosPost);

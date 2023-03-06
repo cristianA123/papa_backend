@@ -2,36 +2,79 @@ const { response, request } = require( 'express' );
 
 const bcryptjs = require('bcryptjs');
 const { generarJWT } = require('../helpers/generarJWT.JS');
-
+const moment = require('moment');
 const Usuario =  require('../models/usuario');
 
 
 const usuariosGet = async (req = request, res= response) => {
 
 
-    // const {q, nombre = "no ingreso nombre", apikey} = req.query;
+    try {
 
-    const { limit =5, desde = 0 } = req.query;
-    /*  const usuario = await Usuario.find( { estado : true } )
-        .skip( Number( desde ) )  // podemos validar desde donde, por cualquier error
-        .limit( Number(  limit));
-    const total = await Usuario.countDocuments( { estado : true } ); */
+         // const {q, nombre = "no ingreso nombre", apikey} = req.query;
 
-
-//Esto es una consulta mas rapida
-    const [total, usuario] = await Promise.all([
-        Usuario.countDocuments( { estado : true }),
-        Usuario.find( { estado : true })
+        // const { limit =5, desde = 0 } = req.query;
+        /*  const usuario = await Usuario.find( { estado : true } )
             .skip( Number( desde ) )  // podemos validar desde donde, por cualquier error
-            .limit( Number(  limit))
-    ])
+            .limit( Number(  limit));
+        const total = await Usuario.countDocuments( { estado : true } ); */
 
-    res.json({
-        usuario,
-        total
-    }
+
+        //Esto es una consulta mas rapida
+        const [total, usuario] = await Promise.all([
+            Usuario.countDocuments( { estado : true }),
+            Usuario.find( { estado : true })
+                // .skip( Number( 5 ) )  // podemos validar desde donde, por cualquier error
+                // .limit( Number(  limit))
+        ])
+
+        return res.json({
+            success: true,
+            usuario,
+            total
+        });
         
-    );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            msg: "Ocurió un problema inesperado, Comuniquese con el administrador"
+        });
+    }
+   
+};
+
+const userFullName = async (req = request, res= response) => {
+
+    try {
+
+        // const usuario = await Usuario.find( { estado : true } )
+        // .select('nombre apellido dni');
+
+        const usuarios = await Usuario.aggregate([
+            { $match: { estado: true } }, // filtra los documentos con estado verdadero
+            {
+              $project: {
+                // _id: 0, // excluye el campo _id del resultado
+                nombreCompleto: { $concat: [ "$nombre", " ", "$apellido" ] }, // combina los valores de nombre y correo en un solo campo
+                dni: { $concat: [ "$dni"] }, // combina los valores de nombre y correo en un solo campo
+              },
+            },
+          ]);
+
+        return res.json({
+            success: true,
+            usuarios
+        });
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            msg: "Ocurió un problema inesperado, Comuniquese con el administrador"
+        });
+    }
+   
 };
 
 const usuariosPut = async (req = request, res =response ) => {
@@ -56,24 +99,35 @@ const usuariosPut = async (req = request, res =response ) => {
 
 const usuariosPost = async (req, res =response) => {
 
-    const { nombre, correo, password, rol , img} = req.body;
-    const usuario = new Usuario( { nombre, correo, password, rol, img } );
+    try {
+        const { nombre, correo, dni, } = req.body;
+        const usuario = new Usuario( { nombre, correo, dni, role: '63fc095cf638591948efef84', ...req.body} );
+    
+        // Emcriptar la contraseña
+        const salt = bcryptjs.genSaltSync();
+        usuario.password = bcryptjs.hashSync( dni, salt )
+    
+        //Guardar en BD
+        await usuario.save();
+    
+        // Generar el JWT
+        const token = await generarJWT( usuario.uid );
+    
+        return res.json({
+            success: true,
+            token,
+            usuario
+        });
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            msg: "Ocurió un problema inesperado, Comuniquese con el administrador"
+        });
+    }
 
-    // Emcriptar la contraseña
-    const salt = bcryptjs.genSaltSync();
-    usuario.password = bcryptjs.hashSync( password, salt )
-
-    //Guardar en BD
-    await usuario.save();
-
-            // Generar el JWT
-            const token = await generarJWT( usuario.uid );
-
-    res.json({
-        'ok':true,
-        token,
-        usuario
-    });
+ 
 }
 
 const usuariosPath   =(req, res) => {
@@ -111,7 +165,8 @@ module.exports = {
     usuariosPut,
     usuariosPost,
     usuariosPath,
-    usuariosDelete
+    usuariosDelete,
+    userFullName
 }
 
 // PARA CREAR UN TAG
