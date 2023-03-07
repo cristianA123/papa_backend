@@ -6,6 +6,7 @@
  const Usuario = require('./usuario');
  const Producto = require('./producto');
  const Solicitud = require('./solicitud');
+ const Deposito = require('./deposito');
 
 
  module.exports = {
@@ -14,5 +15,6 @@
     Server,
     Usuario,
     Producto,
-    Solicitud
+    Solicitud,
+    Deposito
  }
